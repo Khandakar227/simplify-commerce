@@ -59,7 +59,9 @@ CREATE TABLE IF NOT EXISTS payment_method (
         FOREIGN KEY (sellerId) REFERENCES seller (id) on delete cascade,
         createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
-
+-- Full-text search index
+CREATE FULLTEXT INDEX idx_fulltext_search
+ON product (name, category);
 
 DROP FUNCTION IF EXISTS generate_slug;
 DELIMITER / /

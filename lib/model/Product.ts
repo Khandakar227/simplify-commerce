@@ -57,6 +57,43 @@ class Product {
     static async deleteBySlug(slug:string, sellerId:number) {
         await pool.execute(`DELETE FROM product WHERE slug = ? and sellerId = ?`, [slug, sellerId]);
     }
+
+    static async findSellersProduct(sellerId:number, data: { keyword: string, category: string, sortby: string, order: string, page: string }) {
+        const { keyword, category, sortby, order, page } = data;
+        const limit = 20;
+        const offset = (parseInt(page) || 1 - 1) * limit;
+        const values: (string| number)[] = [];
+        
+        let orderBy = '', matchKeyword = '', categoryFilter = '';
+        
+        if(keyword.trim()) {
+            matchKeyword = `MATCH(name, category) AGAINST (? IN NATURAL LANGUAGE MODE)`;
+            values.push(keyword);
+        }
+
+        if(category) {
+            categoryFilter = `AND category = ?`;
+            values.push(category);
+        }
+        
+        if (sortby && order) {
+            orderBy = `ORDER BY ${sortby} ${order === 'ASC' ? 'ASC' : 'DESC'}`;
+        }
+        values.push(sellerId);
+        
+        console.log(values);
+
+        const [rows] = await pool.execute(`SELECT product.id, name, price, stock, MIN(pi.url) as picture FROM product
+            LEFT JOIN product_image pi ON product.id = pi.productId
+            WHERE ${matchKeyword} ${categoryFilter} AND sellerId = ?
+            GROUP BY product.id
+            ${orderBy}
+            LIMIT ${limit}
+            OFFSET ${offset}`, values);
+        return rows as IProduct[];
+    }
 }
 
 export default Product;
+
+// 'Charger', 1, 'name', 'ASC',  0

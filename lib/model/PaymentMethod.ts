@@ -19,7 +19,21 @@ export class PaymentMethod {
         return (rows as IPaymentMethod[]);
     }
 
-    static async deleteById (id: number) {
-        await pool.execute(`DELETE FROM payment_method WHERE id = ?`, [id]);
+    static async update(id: number, sellerId: number, data: { name: string, company: string, description: string }) {
+        const fieldsToUpdate: string[] = [];
+        const values: (string | any)[] = [];
+        
+        const fields = Object.keys(data);
+
+        fields.forEach((key, i) => {
+            fieldsToUpdate.push(`${key} = ?`);
+            values.push(data[key as keyof typeof data]);
+        });
+        
+        await pool.execute(`UPDATE payment_method SET ${fieldsToUpdate.join(',')} WHERE id = ? and sellerId = ?`, [...values, id, sellerId]);
+    }
+
+    static async deleteById (id: number, sellerId: number) {
+        await pool.execute(`DELETE FROM payment_method WHERE id = ? AND sellerId = ?`, [id, sellerId]);
     }
 }

@@ -107,28 +107,27 @@ export const init = async () => {
     // Trigger
     await connection.query(`DROP TRIGGER IF EXISTS before_product_insert;`);
     await connection.query(`
-    CREATE TRIGGER before_product_insert
-    BEFORE INSERT ON product
-    FOR EACH ROW
-    BEGIN
-        DECLARE cat_name varchar(255);
+        CREATE TRIGGER before_product_insert
+        BEFORE INSERT ON product
+        FOR EACH ROW
+        BEGIN
+            DECLARE cat_name VARCHAR(255);
 
-        -- Check if the category already exists
-        SELECT name INTO cat_name FROM category WHERE cat_name = NEW.category;
+            -- Check if the category already exists
+            SELECT name INTO cat_name FROM category WHERE name = NEW.category;
 
-        -- If category does not exist, insert it
-        IF cat_name IS NULL THEN
-            INSERT INTO category (name) VALUES (NEW.category);
-        ELSE
-            -- Use the existing category id
-            SET NEW.category = cat_name;
-        END IF;
-    END;
-`);
-        await connection.end();
-    } catch (error) {
-        console.log(error);
-    }
+            -- If category does not exist, insert it
+            IF cat_name IS NULL THEN
+                INSERT INTO category (name) VALUES (NEW.category);
+            END IF;
+        END;
+    `);
+
+    await connection.query(`CREATE FULLTEXT INDEX idx_fulltext_search ON product (name, category);`);
+    await connection.end();
+   } catch (error) {
+       console.log(error);
+   }
 }
 
 export default pool;
