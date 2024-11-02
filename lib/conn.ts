@@ -74,6 +74,16 @@ export const init = async () => {
         createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
     );`)
 
+    await connection.query(`CREATE TABLE IF NOT EXISTS payment_method (
+        id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        name ENUM('BankTransfer', 'MobileBanking', 'CashOnDelivery') NOT NULL,
+        company VARCHAR(255),
+        description TEXT,
+        sellerId INT UNSIGNED,
+        FOREIGN KEY (sellerId) REFERENCES seller (id) on delete cascade,
+        createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );`);
+
     await connection.query(`DROP FUNCTION IF EXISTS generate_slug;`);
     await connection.query(`
     CREATE FUNCTION generate_slug(product_name VARCHAR(255)) 
