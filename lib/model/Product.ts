@@ -13,16 +13,16 @@ export interface IProduct {
 };
 
 class Product {
-    static async create (data: { name: string, description: string, price: number, stock: number, category: string, pictures: string[], sellerId: number }) {
+    static async create(data: { name: string, description: string, price: number, stock: number, category: string, pictures: string[], sellerId: number }) {
         const result = await pool.execute(`INSERT INTO product (name, description, price, stock, category, sellerId, slug) VALUES (?, ?, ?, ?, ?, ?, generate_slug(?))`,
-        [data.name, data.description, data.price, data.stock, data.category, data.sellerId, data.name]);
-        
+            [data.name, data.description, data.price, data.stock, data.category, data.sellerId, data.name]);
+
         data?.pictures?.forEach(async (url) => {
             await pool.execute(`INSERT INTO product_image (productId, url) VALUES (?, ?)`, [(result[0] as any).insertId, url]);
         });
     }
 
-    static async findBySlug (slug: string) {
+    static async findBySlug(slug: string) {
         const [rows] = await pool.execute(`
             select product.*, 
             CASE 
@@ -33,10 +33,10 @@ class Product {
         return (rows as IProduct[])[0];
     }
 
-    static async update(id:string, sellerId:number, data:{ name: string, description: string, slug: string, price: number, stock: number, category: string, pictures: string[] }) {
+    static async update(id: string, sellerId: number, data: { name: string, description: string, slug: string, price: number, stock: number, category: string, pictures: string[] }) {
         const fieldsToUpdate: string[] = [];
         const values: (string | any)[] = [];
-        
+
         const fields = Object.keys(data);
 
         fields.forEach((key, i) => {
@@ -44,9 +44,9 @@ class Product {
             fieldsToUpdate.push(`${key} = ?`);
             values.push(data[key as keyof typeof data]);
         });
-        
+
         await pool.execute(`UPDATE product SET ${fieldsToUpdate.join(',')} WHERE id = ? and sellerId = ?`, [...values, id, sellerId]);
-        if(data.pictures) {
+        if (data.pictures) {
             await pool.execute(`DELETE FROM product_image WHERE productId = ?`, [id]);
             data?.pictures.forEach(async (url) => {
                 await pool.execute(`INSERT INTO product_image (productId, url) VALUES (?, ?)`, [id, url]);
@@ -54,43 +54,55 @@ class Product {
         }
     }
 
-    static async deleteBySlug(slug:string, sellerId:number) {
+    static async deleteBySlug(slug: string, sellerId: number) {
         await pool.execute(`DELETE FROM product WHERE slug = ? and sellerId = ?`, [slug, sellerId]);
     }
 
-    static async findSellersProduct(sellerId:number, data: { keyword: string, category: string, sortby: string, order: string, page: string }) {
+    static async findSellersProduct(sellerId: number, data: { keyword: string, category: string, sortby: string, order: string, page: string }) {
         const { keyword, category, sortby, order, page } = data;
         const limit = 20;
         const offset = (parseInt(page) || 1 - 1) * limit;
-        const values: (string| number)[] = [];
-        
+        const values: (string | number)[] = [];
+
         let orderBy = '', matchKeyword = '', categoryFilter = '';
-        
-        if(keyword.trim()) {
-            matchKeyword = `MATCH(name, category) AGAINST (? IN NATURAL LANGUAGE MODE)`;
-            values.push(keyword);
+
+        if (keyword && keyword?.trim()) {
+            matchKeyword = `(name LIKE CONCAT('%', ?, '%') OR category LIKE CONCAT('%', ?, '%')) AND`;
+            values.push(keyword, keyword);
         }
 
-        if(category) {
-            categoryFilter = `AND category = ?`;
+        if (category) {
+            categoryFilter = `category = ? AND`;
             values.push(category);
         }
-        
+
         if (sortby && order) {
             orderBy = `ORDER BY ${sortby} ${order === 'ASC' ? 'ASC' : 'DESC'}`;
         }
         values.push(sellerId);
-        
-        console.log(values);
 
-        const [rows] = await pool.execute(`SELECT product.id, name, price, stock, MIN(pi.url) as picture FROM product
+        const countQuery = `SELECT COUNT(*) as totalCount FROM product
+        WHERE ${matchKeyword} ${categoryFilter} sellerId = ?`;
+
+        const dataQuery = `SELECT product.id, name, price, stock, MIN(pi.url) as picture FROM product
             LEFT JOIN product_image pi ON product.id = pi.productId
-            WHERE ${matchKeyword} ${categoryFilter} AND sellerId = ?
+            WHERE ${matchKeyword} ${categoryFilter} sellerId = ?
             GROUP BY product.id
             ${orderBy}
             LIMIT ${limit}
-            OFFSET ${offset}`, values);
-        return rows as IProduct[];
+            OFFSET ${offset}`;
+
+        const [[{ totalCount }]]: any = await pool.execute(countQuery, values);
+        const [rows] = await pool.execute(dataQuery, values);
+        const totalPages = Math.ceil(totalCount / limit);
+
+        console.log(rows)
+        return {
+            totalPages,
+            totalCount,
+            currentPage: parseInt(page) || 1,
+            data: rows as IProduct[],
+        };
     }
 }
 

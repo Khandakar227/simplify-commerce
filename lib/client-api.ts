@@ -51,3 +51,18 @@ export const createProduct = async (data:Omit<IProduct, 'id'>) => {
     const result = await res.json();
     return result;
 }
+
+export const getProducts = async (params: { keyword?: string, category?: string, sortby?: string, order?: string, page?: string, seller?: boolean }) => {
+    const searchParams = new URLSearchParams(params as any);
+    const token = localStorage.getItem('access_token');
+    const options = {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+    };
+    console.log(searchParams.toString());
+    const res = await fetch(`/api/product?${searchParams}`, options);
+    const result = await res.json();
+    return result;
+}
