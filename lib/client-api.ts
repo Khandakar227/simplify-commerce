@@ -66,3 +66,18 @@ export const getProducts = async (params: { keyword?: string, category?: string,
     const result = await res.json();
     return result;
 }
+
+
+export const getUserInfo = async () => {
+    const token = localStorage.getItem('access_token');
+    const options = {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+    };
+
+    const res = await fetch(`/api/seller`, options);
+    const result = await res.json();
+    return result;
+}
