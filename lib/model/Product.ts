@@ -58,6 +58,10 @@ class Product {
         await pool.execute(`DELETE FROM product WHERE slug = ? and sellerId = ?`, [slug, sellerId]);
     }
 
+    static async deleteById(id: string, sellerId: number) {
+        await pool.execute(`DELETE FROM product WHERE id = ? and sellerId = ?`, [id, sellerId]);
+    }
+
     static async findSellersProduct(sellerId: number, data: { keyword: string, category: string, sortby: string, order: string, page: string }) {
         const { keyword, category, sortby, order, page } = data;
         const limit = 20;
@@ -84,7 +88,7 @@ class Product {
         const countQuery = `SELECT COUNT(*) as totalCount FROM product
         WHERE ${matchKeyword} ${categoryFilter} sellerId = ?`;
 
-        const dataQuery = `SELECT product.id, name, price, stock, MIN(pi.url) as picture FROM product
+        const dataQuery = `SELECT product.id, name, price, stock, totalSold, MIN(pi.url) as picture FROM product
             LEFT JOIN product_image pi ON product.id = pi.productId
             WHERE ${matchKeyword} ${categoryFilter} sellerId = ?
             GROUP BY product.id

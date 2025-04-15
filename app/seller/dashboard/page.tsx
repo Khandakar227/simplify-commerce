@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { getProducts } from "@/lib/client-api";
 import { IProduct } from "@/lib/model/Product";
 import { Search } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function Dashboard() {
@@ -44,10 +45,15 @@ export default function Dashboard() {
           <CardHeader>
             <CardTitle className="text-2xl">Products Inventory</CardTitle>
             <CardDescription>
-              <form onSubmit={search} className="my-5 flex gap-4 items-center justify-center max-w-[400px] w-full">
-                <Input type="search" placeholder="Search Products" name="keyword"/>
-                <Button><Search/></Button>
-              </form>
+              <div className="flex justify-between items-center gap-4 md:flex-row">
+                <Link href="/seller/add">
+                  <Button className="dark:bg-green-300 bg-green-300">Add New Product</Button>
+                </Link>
+                <form onSubmit={search} className="my-5 flex gap-4 items-center justify-center max-w-[400px] w-full">
+                  <Input type="search" placeholder="Search Products" name="keyword" className="bg-white bg-opacity-20"/>
+                  <Button><Search/></Button>
+                </form>
+              </div>
             </CardDescription>
           </CardHeader>
 

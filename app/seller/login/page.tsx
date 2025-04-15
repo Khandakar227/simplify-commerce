@@ -68,7 +68,7 @@ const LoginTab = () => {
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Manage Your Sales & Inventory</CardTitle>
+          <CardTitle><h1 className="text-3xl text-center">Manage Your Sales & Inventory</h1></CardTitle>
         </CardHeader>
 
         <CardContent>
@@ -99,7 +99,7 @@ const RegisterTab = () => {
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Start Selling: Sign Up Now</CardTitle>
+          <CardTitle><h1 className="text-3xl text-center">Start Selling: Sign Up Now</h1></CardTitle>
         </CardHeader>
 
         <CardContent>
