@@ -12,17 +12,20 @@ interface ICustomer {
 }
 
 class Customer {
-  static async create(data: { name?: string, email?: string, phone?: string, address?: string, isGuest?: boolean }) {
-    const { name, email, phone, address, isGuest = true } = data;
+    /**
+     * Password must be hashed before calling this method.
+     */
+  static async create(data: { name?: string, password:string, email?: string, phone?: string, address?: string, isGuest?: boolean }) {
+    const { name, email, phone, address, isGuest, password } = data;
     const [result]: any = await pool.execute(
-      `INSERT INTO customer (name, email, phone, address, isGuest) VALUES (?, ?, ?, ?, ?)`,
-      [name, email, phone, address, isGuest]
+      `INSERT INTO customer (name, email, password, phone, address, isGuest) VALUES (?, ?, ?, ?, ?)`,
+      [name, email, password, phone, address, isGuest]
     );
     return result.insertId;
   }
 
   static async findByEmail(email: string) {
-    const [rows]: any = await pool.execute(`SELECT * FROM customer WHERE email = ?`, [email]);
+    const [rows]: any = await pool.execute(`SELECT * FROM customer WHERE email = ? AND password IS NOT NULL`, [email]);
     return rows[0] as ICustomer;
   }
 

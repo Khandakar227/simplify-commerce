@@ -67,6 +67,7 @@ CREATE TABLE IF NOT EXISTS customer (
     name VARCHAR(255),
     email VARCHAR(255),
     phone VARCHAR(255),
+    password VARCHAR(255),
     address TEXT,
     isGuest BOOLEAN DEFAULT TRUE,
     createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
