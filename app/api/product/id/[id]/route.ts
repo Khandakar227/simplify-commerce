@@ -20,3 +20,21 @@ export const PUT = async (request: Request, { params }: { params: Promise<{ id: 
         );
     }
 }
+
+export const DELETE = async (request: Request, { params }: { params: Promise<{ id: string }> }) => {
+    try {
+        const payload:any = await getProfileFromRequest(request);
+        if (!payload) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+        
+        const id = (await params).id;
+        // Seller can only delete their own product
+        await Product.deleteById(id, payload.id);
+        return NextResponse.json({ message: "Deleted product" }, { status: 200 });
+    } catch (error:any) {
+        console.error(error);
+        return NextResponse.json(
+            { error: 'Failed to delete product', errorName: error.name },
+            { status: 500 }
+        );
+    }
+}

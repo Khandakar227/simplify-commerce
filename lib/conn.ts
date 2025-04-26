@@ -51,14 +51,14 @@ export const init = async () => {
     slug VARCHAR(255) NOT NULL UNIQUE,
     price DECIMAL(10, 2) NOT NULL,
     stock INT UNSIGNED NOT NULL,
+    totalSold INT UNSIGNED NOT NULL DEFAULT 0
     category VARCHAR(255),
     sellerId INT UNSIGNED,
     FOREIGN KEY (sellerId) REFERENCES seller(id) on delete set null on update no action,
     FOREIGN KEY (category) REFERENCES category(name),
     createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
     );`);
-
-    await connection.query(`
+        await connection.query(`
         CREATE TABLE IF NOT EXISTS product_image (
             id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             productId INT UNSIGNED,
@@ -66,7 +66,7 @@ export const init = async () => {
             FOREIGN KEY (productId) REFERENCES product(id) on delete cascade
             );`);
 
-    await connection.query(`CREATE TABLE IF NOT EXISTS refresh_token (
+        await connection.query(`CREATE TABLE IF NOT EXISTS refresh_token (
         id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
         token VARCHAR(255) NOT NULL,
         userId INT UNSIGNED,
@@ -74,7 +74,7 @@ export const init = async () => {
         createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
     );`)
 
-    await connection.query(`CREATE TABLE IF NOT EXISTS payment_method (
+        await connection.query(`CREATE TABLE IF NOT EXISTS payment_method (
         id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
         name ENUM('BankTransfer', 'MobileBanking', 'CashOnDelivery') NOT NULL,
         company VARCHAR(255),
@@ -84,8 +84,8 @@ export const init = async () => {
         createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
     );`);
 
-    await connection.query(`DROP FUNCTION IF EXISTS generate_slug;`);
-    await connection.query(`
+        await connection.query(`DROP FUNCTION IF EXISTS generate_slug;`);
+        await connection.query(`
     CREATE FUNCTION generate_slug(product_name VARCHAR(255)) 
     RETURNS VARCHAR(255)
     DETERMINISTIC
@@ -104,9 +104,9 @@ export const init = async () => {
         RETURN slug;
     END;
 `);
-    // Trigger
-    await connection.query(`DROP TRIGGER IF EXISTS before_product_insert;`);
-    await connection.query(`
+        // Trigger
+        await connection.query(`DROP TRIGGER IF EXISTS before_product_insert;`);
+        await connection.query(`
         CREATE TRIGGER before_product_insert
         BEFORE INSERT ON product
         FOR EACH ROW
@@ -123,11 +123,11 @@ export const init = async () => {
         END;
     `);
 
-    await connection.query(`CREATE FULLTEXT INDEX idx_fulltext_search ON product (name, category);`);
-    await connection.end();
-   } catch (error) {
-       console.log(error);
-   }
+        await connection.query(`CREATE FULLTEXT INDEX idx_fulltext_search ON product (name, category);`);
+        await connection.end();
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 export default pool;

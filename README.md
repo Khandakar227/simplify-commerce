@@ -60,3 +60,10 @@ Status Code: 401 Unauthorized
   "error": true
 }
 ```
+
+
+# TODO
+1. Landing UI for showing the products to customer
+2. Customer adding them to cart.
+3. Customer Ordering.
+4. Seller viewing the order.

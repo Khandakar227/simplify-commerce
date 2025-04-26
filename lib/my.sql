@@ -26,6 +26,7 @@ CREATE TABLE
         slug VARCHAR(255) NOT NULL UNIQUE,
         price DECIMAL(10, 2) NOT NULL,
         stock INT UNSIGNED NOT NULL,
+        totalSold INT UNSIGNED NOT NULL DEFAULT 0,
         category VARCHAR(255),
         sellerId INT UNSIGNED,
         FOREIGN KEY (sellerId) REFERENCES seller (id) on delete set null on update no action,
@@ -59,6 +60,63 @@ CREATE TABLE IF NOT EXISTS payment_method (
         FOREIGN KEY (sellerId) REFERENCES seller (id) on delete cascade,
         createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
+
+-- Customer table
+CREATE TABLE IF NOT EXISTS customer (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255),
+    email VARCHAR(255),
+    phone VARCHAR(255),
+    password VARCHAR(255),
+    address TEXT,
+    isGuest BOOLEAN DEFAULT TRUE,
+    createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Orders table
+CREATE TABLE IF NOT EXISTS `order` (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    customerId INT UNSIGNED,
+    sellerId INT UNSIGNED,
+    paymentMethodId INT UNSIGNED,
+    status ENUM('Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled') DEFAULT 'Pending',
+    totalAmount DECIMAL(10,2) NOT NULL,
+    shippingAddress TEXT,
+    placedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (customerId) REFERENCES customer(id) ON DELETE SET NULL,
+    FOREIGN KEY (sellerId) REFERENCES seller(id) ON DELETE SET NULL,
+    FOREIGN KEY (paymentMethodId) REFERENCES payment_method(id) ON DELETE SET NULL
+);
+
+-- Order items
+CREATE TABLE IF NOT EXISTS order_item (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    orderId INT UNSIGNED NOT NULL,
+    productId INT UNSIGNED NOT NULL,
+    quantity INT UNSIGNED NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (orderId) REFERENCES `order`(id) ON DELETE CASCADE,
+    FOREIGN KEY (productId) REFERENCES product(id) ON DELETE CASCADE
+);
+
+-- Cart table
+CREATE TABLE IF NOT EXISTS cart (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    customerId INT UNSIGNED,
+    createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (customerId) REFERENCES customer(id) ON DELETE CASCADE
+);
+
+-- Cart items
+CREATE TABLE IF NOT EXISTS cart_item (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    cartId INT UNSIGNED NOT NULL,
+    productId INT UNSIGNED NOT NULL,
+    quantity INT UNSIGNED NOT NULL,
+    FOREIGN KEY (cartId) REFERENCES cart(id) ON DELETE CASCADE,
+    FOREIGN KEY (productId) REFERENCES product(id) ON DELETE CASCADE
+);
+
 -- Full-text search index
 CREATE FULLTEXT INDEX idx_fulltext_search
 ON product (name, category);
