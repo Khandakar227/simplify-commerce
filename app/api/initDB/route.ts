@@ -11,7 +11,7 @@ export const GET = async (request: NextRequest) => {
                 method: 'POST',
                 headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VsbGVyIiwiaWQiOjEsImVtYWlsIjoicmlmYXRzYXJ3YXJAaXV0LWRoYWthLmVkdSIsIm5hbWUiOiJSaWZhdCIsImNyZWF0ZWRBdCI6IjIwMjQtMTEtMjFUMDU6MDA6NTcuMDAwWiIsImlhdCI6MTczMjE2NTI4NiwiZXhwIjoxNzMyMTY4ODg2fQ.5Pt88YLsu_l-09JkBqbV3nLXr9Syu5EfcO5qhgUgDHE`
+                'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VsbGVyIiwiaWQiOjEsImVtYWlsIjoiaGlAZ21haWwuY29tIiwibmFtZSI6Ildhc2lmIiwiY3JlYXRlZEF0IjoiMjAyNS0wNC0yNlQxOTo1NDo1OC4wMDBaIiwiaWF0IjoxNzQ1Njk3MzM2LCJleHAiOjE3NDU3MDA5MzZ9.ZiZDaQ1Vr9TnLSxy-fsBQk_y03ssDscxoFpc87-hfaY`
                 },
                 body: JSON.stringify({
                 name: product.title,
