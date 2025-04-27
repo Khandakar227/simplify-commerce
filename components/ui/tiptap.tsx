@@ -70,7 +70,7 @@ const Tiptap = ({onContentChange}:{onContentChange:(data:string)=>void}) => {
           <button onClick={() => editor.chain().focus().redo().run()}>↪</button>
         </div>
       )}
-      <div className="w-full">
+      <div className="w-full bg-white rounded-b-md">
         <EditorContent editor={editor} />
       </div>
     </div>
