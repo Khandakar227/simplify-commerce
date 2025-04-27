@@ -1,22 +1,50 @@
 "use client";
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { useParams, useRouter } from "next/navigation";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
-export default function Home() {
-  const [products, setProducts] = useState<any[]>([]);
+export default function ProductDetailPage() {
+  const params = useParams();
+  const router = useRouter();
+  const slug = params.slug as string;
+  const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
-    async function fetchProducts() {
+    async function fetchProduct() {
       setLoading(true);
-      const res = await fetch("/api/product");
+      const res = await fetch(`/api/product/${slug}`);
       const data = await res.json();
-      setProducts(data.data || []);
+      setProduct(data.product || null);
       setLoading(false);
     }
-    fetchProducts();
-  }, []);
+    if (slug) fetchProduct();
+  }, [slug]);
+
+  const addToCart = () => {
+    if (!product) return;
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    const existing = cart.find((item: any) => item.productId === product.id);
+    if (existing) {
+      existing.quantity += quantity;
+    } else {
+      cart.push({
+        productId: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.pictures?.[0] || "",
+        stock: product.stock,
+        quantity,
+      });
+    }
+    localStorage.setItem("cart", JSON.stringify(cart));
+    alert("Added to cart!");
+  };
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  if (!product) return <div className="min-h-screen flex items-center justify-center">Product not found.</div>;
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-green-50 to-green-100">
@@ -29,7 +57,7 @@ export default function Home() {
           <span className="text-2xl font-bold tracking-wide text-green-700">Simply Commerce</span>
         </div>
         <div className="flex-1 flex justify-center">
-          <span className="text-green-700 font-semibold px-4 py-2 rounded-lg">Home</span>
+          <Button variant="outline" onClick={() => router.push("/")}>Home</Button>
         </div>
         <div className="rounded-full p-2 border border-green-200 flex items-center justify-center">
           <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -39,31 +67,41 @@ export default function Home() {
         </div>
       </nav>
       <main className="flex-1 flex flex-col items-center py-8 px-2">
-        <div className="w-full max-w-6xl mx-auto">
-          <h1 className="font-extrabold text-4xl text-green-700 text-center mb-8">Shop Products</h1>
-          {loading ? (
-            <div className="flex justify-center items-center min-h-[200px]">Loading...</div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-              {products.map((product) => (
-                <Link href={`/product/${product.slug}`} key={product.id} className="hover:no-underline">
-                  <Card className="bg-white border border-amber-200 rounded-xl shadow-md p-4 transition-transform hover:scale-105 hover:shadow-lg flex flex-col h-full">
-                    <CardHeader className="flex flex-col items-center">
-                      {product.pictures && product.pictures.length > 0 && (
-                        <img src={product.pictures[0]} alt={product.name} className="rounded-md w-full max-w-xs h-40 object-contain mb-2" />
-                      )}
-                      <h2 className="font-bold text-lg text-green-700 text-center">{product.name}</h2>
-                    </CardHeader>
-                    <CardContent className="flex flex-col items-center gap-2">
-                      <span className="text-green-700 font-semibold">৳{product.price}</span>
-                      <span className="text-green-600 text-xs">Stock: {product.stock}</span>
-                      <span className="text-green-500 text-xs">Category: {product.category}</span>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-            </div>
-          )}
+        <div className="w-full max-w-2xl mx-auto">
+          <Card className="bg-amber-50 shadow-xl rounded-xl border border-amber-200 p-6">
+            <CardHeader>
+              <h1 className="font-extrabold text-3xl text-green-700 py-2 text-center">{product.name}</h1>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col items-center gap-4">
+                {product.pictures && product.pictures.length > 0 && (
+                  <img src={product.pictures[0]} alt={product.name} className="rounded-md w-full max-w-xs object-contain" />
+                )}
+                <div className="w-full flex flex-col gap-2">
+                  <p className="text-green-700 font-semibold">Category: <span className="font-normal">{product.category}</span></p>
+                  <p className="text-green-700 font-semibold">Stock: <span className="font-normal">{product.stock}</span></p>
+                  <p className="text-green-700 font-semibold">Price: <span className="font-normal">৳{product.price}</span></p>
+                </div>
+                <div className="w-full mt-4">
+                  <h2 className="text-xl font-bold text-green-700 mb-2">Description</h2>
+                  <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: product.description }} />
+                </div>
+                <div className="flex items-center gap-4 mt-6">
+                  <input
+                    type="number"
+                    min={1}
+                    max={product.stock}
+                    value={quantity}
+                    onChange={e => setQuantity(Math.max(1, Math.min(product.stock, Number(e.target.value))))}
+                    className="w-20 px-2 py-1 border border-green-300 rounded-lg text-green-700 text-center"
+                  />
+                  <Button className="bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow transition" onClick={addToCart}>
+                    Add to Cart
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </main>
       <footer className="w-full bg-green-600 text-white py-6 mt-8 shadow-inner">
@@ -96,4 +134,4 @@ export default function Home() {
       </footer>
     </div>
   );
-}
+} 

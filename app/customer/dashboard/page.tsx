@@ -1,16 +1,16 @@
 "use client";
 import { useUser } from "@/lib/global-states/user";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+// import { useRouter } from "next/navigation";
+// import { useEffect } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 
 export default function CustomerDashboard() {
   const [user] = useUser();
-  const router = useRouter();
+  // const router = useRouter();
 
-  useEffect(() => {
-    if (!user?.name) router.replace("/customer/login");
-  }, [user]);
+  // useEffect(() => {
+  //   if (!user?.name) router.replace("/customer/login");
+  // }, [user]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-green-50 to-green-100">

@@ -109,6 +109,55 @@ class Product {
             data: rows as IProduct[],
         };
     }
+
+    static async findAllProducts(data: { keyword?: string, category?: string, sortby?: string, order?: string, page?: string }) {
+        const { keyword, category, sortby } = data;
+        const order = data.order || 'DESC';
+        const page = data.page || '1';
+        const limit = 20;
+        const offset = ((parseInt(page) || 1) - 1) * limit;
+        const values: (string | number)[] = [];
+
+        let orderBy = '', matchKeyword = '', categoryFilter = '';
+
+        if (keyword && keyword.trim()) {
+            matchKeyword = `(product.name LIKE CONCAT('%', ?, '%') OR product.category LIKE CONCAT('%', ?, '%')) AND`;
+            values.push(keyword, keyword);
+        }
+
+        if (category) {
+            categoryFilter = `product.category = ? AND`;
+            values.push(category);
+        }
+
+        if (sortby) {
+            orderBy = `ORDER BY product.${sortby} ${order === 'ASC' ? 'ASC' : 'DESC'}`;
+        }
+
+        const countQuery = `SELECT COUNT(*) as totalCount FROM product WHERE ${matchKeyword} ${categoryFilter} 1`;
+        const dataQuery = `SELECT product.*, 
+            CASE WHEN COUNT(product_image.url) = 0 THEN JSON_ARRAY() ELSE JSON_ARRAYAGG(product_image.url) END AS pictures,
+            seller.name as sellerName, seller.email as sellerEmail
+            FROM product
+            JOIN seller ON seller.id = product.sellerId
+            LEFT JOIN product_image ON product_image.productId = product.id
+            WHERE ${matchKeyword} ${categoryFilter} 1
+            GROUP BY product.id
+            ${orderBy}
+            LIMIT ${limit}
+            OFFSET ${offset}`;
+
+        const [[{ totalCount }]]: any = await pool.execute(countQuery, values);
+        const [rows] = await pool.execute(dataQuery, values);
+        const totalPages = Math.ceil(totalCount / limit);
+
+        return {
+            totalPages,
+            totalCount,
+            currentPage: parseInt(page) || 1,
+            data: rows as IProduct[],
+        };
+    }
 }
 
 export default Product;

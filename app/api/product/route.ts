@@ -33,17 +33,18 @@ export const GET = async (request: NextRequest) => {
         const order = searchParams.get('order') as string;
         const page = searchParams.get('page') as string;
 
-        let sellerId = 0;
         if (forSeller) {
             const payload:any = await getProfileFromRequest(request);
             if (!payload) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
             // Only seller can get their products
             if (payload.role !== 'seller') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-            sellerId = payload.id;
+            const sellerId = payload.id;
             const products = await Product.findSellersProduct(sellerId, { keyword, category, sortby, order, page });
             return NextResponse.json(products, { status: 200 });
         }
-        return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
+        // Public: fetch all products
+        const products = await Product.findAllProducts({ keyword, category, sortby, order, page });
+        return NextResponse.json(products, { status: 200 });
     } catch (error:any) {
         console.error(error);
         return NextResponse.json({ error: 'Failed to fetch products', errorName: error.name }, { status: 500 });
