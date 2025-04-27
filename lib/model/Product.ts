@@ -88,7 +88,9 @@ class Product {
         const countQuery = `SELECT COUNT(*) as totalCount FROM product
         WHERE ${matchKeyword} ${categoryFilter} sellerId = ?`;
 
-        const dataQuery = `SELECT product.id, name, price, stock, totalSold, MIN(pi.url) as picture FROM product
+        // const dataQuery = `SELECT product.id, name, price, stock, totalSold, MIN(pi.url) as picture FROM product
+        const dataQuery = `SELECT product.id, name, price, stock, MIN(pi.url) as picture FROM product
+
             LEFT JOIN product_image pi ON product.id = pi.productId
             WHERE ${matchKeyword} ${categoryFilter} sellerId = ?
             GROUP BY product.id
