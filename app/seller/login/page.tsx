@@ -18,21 +18,28 @@ export default function Login() {
     if(user?.name) router.replace("/seller/dashboard");
   }, [user])
   return (
-    <div className="min-h-screen flex justify-center items-center">
-      <Tabs defaultValue="Login" className="max-w-[400px] w-full">
-        <TabsList className="w-full">
-          <TabsTrigger className="w-full" value="Login">
+    <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-green-50 to-green-100">
+      {/* Logo and Site Name */}
+      <div className="flex items-center mb-8 mt-4">
+        {/* SVG Logo */}
+        <svg className="w-10 h-10 text-green-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <rect x="3" y="6" width="18" height="13" rx="2" strokeWidth="2" stroke="currentColor" fill="white"/>
+          <path d="M16 10l-4 4-2-2" strokeWidth="2" stroke="currentColor" fill="none"/>
+        </svg>
+        <span className="text-3xl font-bold text-green-700 tracking-tight">Simplify Commerce</span>
+      </div>
+      <Tabs defaultValue="Login" className="w-full max-w-md">
+        <TabsList className="w-full bg-transparent rounded-xl mb-2 border border-amber-200">
+          <TabsTrigger className="w-full bg-green-50 data-[state=active]:bg-amber-50 data-[state=active]:font-bold data-[state=active]:text-green-700 text-green-700 font-semibold rounded-xl transition" value="Login">
             Login
           </TabsTrigger>
-          <TabsTrigger className="w-full" value="SignUp">
+          <TabsTrigger className="w-full bg-green-50 data-[state=active]:bg-amber-50 data-[state=active]:font-bold data-[state=active]:text-green-700 text-green-700 font-semibold rounded-xl transition" value="SignUp">
             Sign Up
           </TabsTrigger>
         </TabsList>
-
         <TabsContent value="Login">
           <LoginTab />
         </TabsContent>
-
         <TabsContent value="SignUp">
           <RegisterTab />
         </TabsContent>
@@ -66,18 +73,22 @@ const LoginTab = () => {
   };
   return (
     <>
-      <Card>
+      <Card className="rounded-2xl shadow-xl border border-green-200 bg-amber-50">
         <CardHeader>
-          <CardTitle><h1 className="text-3xl text-center">Manage Your Sales & Inventory</h1></CardTitle>
+          <CardTitle><h1 className="text-3xl text-center text-green-700 font-bold">Manage Your Sales & Inventory</h1></CardTitle>
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={onLogin} method="POST">
-            <Label htmlFor="email">Email</Label>
-            <Input type="email" name="email" required />
-            <Label htmlFor="password">Password</Label>
-            <Input type="password" name="password" required />
-            <Button className="mt-5 w-full" disabled={loading}>
+          <form onSubmit={onLogin} method="POST" className="space-y-4">
+            <div>
+              <Label htmlFor="email" className="text-green-700">Email</Label>
+              <Input type="email" name="email" required className="bg-green-50 focus:bg-white focus:border-green-500" />
+            </div>
+            <div>
+              <Label htmlFor="password" className="text-green-700">Password</Label>
+              <Input type="password" name="password" required className="bg-green-50 focus:bg-white focus:border-green-500" />
+            </div>
+            <Button className="mt-5 w-full bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow transition" disabled={loading}>
               {loading ? (
                 <>
                   <Loader2 className="animate-spin" />
@@ -97,23 +108,26 @@ const LoginTab = () => {
 const RegisterTab = () => {
   return (
     <>
-      <Card>
+      <Card className="rounded-2xl shadow-xl border border-green-200 bg-amber-50">
         <CardHeader>
-          <CardTitle><h1 className="text-3xl text-center">Start Selling: Sign Up Now</h1></CardTitle>
+          <CardTitle><h1 className="text-3xl text-center text-green-700 font-bold">Start Selling: Sign Up Now</h1></CardTitle>
         </CardHeader>
 
         <CardContent>
-          <form>
-            <Label htmlFor="name">Name</Label>
-            <Input type="text" name="name" required />
-
-            <Label htmlFor="email">Email</Label>
-            <Input type="email" name="email" required />
-
-            <Label htmlFor="password">Password</Label>
-            <Input type="password" name="password" required />
-
-            <Button className="mt-5 w-full">Create Seller Account</Button>
+          <form className="space-y-4">
+            <div>
+              <Label htmlFor="name" className="text-green-700">Name</Label>
+              <Input type="text" name="name" required className="bg-green-50 focus:bg-white focus:border-green-500" />
+            </div>
+            <div>
+              <Label htmlFor="email" className="text-green-700">Email</Label>
+              <Input type="email" name="email" required className="bg-green-50 focus:bg-white focus:border-green-500" />
+            </div>
+            <div>
+              <Label htmlFor="password" className="text-green-700">Password</Label>
+              <Input type="password" name="password" required className="bg-green-50 focus:bg-white focus:border-green-500" />
+            </div>
+            <Button className="mt-5 w-full bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow transition">Create Seller Account</Button>
           </form>
         </CardContent>
       </Card>
