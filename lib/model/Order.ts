@@ -33,7 +33,7 @@ class Order {
     customerPhone: string;
     paymentMethodId: number;
     shippingAddress: string;
-    items: { productId: number; quantity: number; unitPrice: number; }[]; // ✅ Add items
+    items: { productId: number; quantity: number }[]; // ✅ Add items
   }) {
     const conn = await pool.getConnection(); // Start a connection
     try {
@@ -77,7 +77,7 @@ class Order {
           data.customerPhone,
           data.paymentMethodId,
           'Pending',
-          data.items.reduce((total, item) => total + item.unitPrice * item.quantity, 0), // Calculate total amount
+          totalAmount,
           data.shippingAddress
         ]
       );
@@ -102,7 +102,6 @@ class Order {
   }
   
   static async findById(id: number) {
-
     const [rows]: any = await pool.execute(`
     select o.*, JSON_ARRAYAGG(
       JSON_OBJECT(
@@ -121,6 +120,28 @@ class Order {
     GROUP BY o.id
     `, [id]);
     return rows[0] as IOrderWithItems;
+  }
+
+  static async findByCustomer(id: number) {
+    const [rows]: any = await pool.execute(`
+      select o.*, JSON_ARRAYAGG(
+        JSON_OBJECT(
+          'id', oi.id,
+          'name', p.name,
+          'image', pi.url,
+          'productId', oi.productId,
+          'quantity', oi.quantity,
+          'unitPrice', oi.unitPrice
+      )) as ordered_items
+      from \`order\` o
+      join order_item oi on o.id = oi.orderId
+      join customer c on c.id = o.customerId
+      join product p on p.id = oi.productId
+      LEFT JOIN product_image pi ON p.id = pi.productId
+      where c.id = ?
+      GROUP BY o.id
+      `, [id]);
+      return rows[0] as IOrderWithItems;
   }
 
   static async updateStatus(id: number, status: string) {

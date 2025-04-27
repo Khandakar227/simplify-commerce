@@ -1,50 +1,69 @@
-// lib/models/Cart.ts
 import pool from '@/lib/conn';
 
-interface ICart {
+interface ICartItem {
   id: number;
   customerId: number;
-  createdAt: Date;
+  productId: number;
+  quantity: number;
 }
 
 class Cart {
-  static async create(customerId: number) {
-    const [result]: any = await pool.execute(
-      `INSERT INTO cart (customerId) VALUES (?)`,
-      [customerId]
+  static async addItem(data: {
+    customerId: number;
+    productId: number;
+    quantity: number;
+  }) {
+    const [existingItem]: any = await pool.execute(
+      `SELECT * FROM cart_item WHERE customerId = ? AND productId = ?`,
+      [data.customerId, data.productId]
     );
-    return result.insertId;
-  }
 
-  static async getCartByCustomerId(customerId: number) {
-    const [rows]: any = await pool.execute(`SELECT * FROM cart WHERE customerId = ?`, [customerId]);
-    return rows[0] as ICart;
-  }
-
-  static async addItem(cartId: number, productId: number, quantity: number) {
-    return await pool.execute(
-      `INSERT INTO cart_item (cartId, productId, quantity) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE quantity = quantity + ?`,
-      [cartId, productId, quantity, quantity]
-    );
-  }
-
-  static async getItems(cartId: number) {
-    const [rows]: any = await pool.execute(`
-      SELECT ci.id, ci.quantity, p.name, p.price, p.stock 
-      FROM cart_item ci
-      JOIN product p ON ci.productId = p.id
-      WHERE ci.cartId = ?`,
-      [cartId]
-    );
-    return rows;
+    if (existingItem.length > 0) {
+      // Update quantity if item already exists
+      await pool.execute(
+        `UPDATE cart_item SET quantity = quantity + ? WHERE id = ?`,
+        [data.quantity, existingItem[0].id]
+      );
+      return existingItem[0].id; // Return cart item ID
+    } else {
+      // Insert new cart item
+      const [result]: any = await pool.execute(
+        `INSERT INTO cart_item (customerId, productId, quantity) VALUES (?, ?, ?)`,
+        [data.customerId, data.productId, data.quantity]
+      );
+      return result.insertId;
+    }
   }
 
   static async removeItem(cartItemId: number) {
-    return await pool.execute(`DELETE FROM cart_item WHERE id = ?`, [cartItemId]);
+    await pool.execute(`DELETE FROM cart_item WHERE id = ?`, [cartItemId]);
   }
 
-  static async clearCart(cartId: number) {
-    return await pool.execute(`DELETE FROM cart_item WHERE cartId = ?`, [cartId]);
+  static async getItemsByCustomerId(customerId: number) {
+    const [rows]: any = await pool.execute(
+      `SELECT ci.*, pi.url as image, p.name FROM cart_item ci
+      JOIN product p ON ci.productId = p.id
+      LEFT JOIN product_image pi ON p.id = pi.productId
+      WHERE ci.customerId = ?`,
+      [customerId]
+    );
+    return rows as ICartItem[];
+  }
+
+  static async updateItemQuantity(cartItemId: number, quantity: number) {
+    if (quantity <= 0) {
+      // Remove item if quantity is 0 or less
+      await pool.execute(`DELETE FROM cart_item WHERE id = ?`, [cartItemId]);
+    } else {
+      await pool.execute(`UPDATE cart_item SET quantity = ? WHERE id = ?`, [
+        quantity,
+        cartItemId
+      ]);
+    }
+  }
+
+  static async clearCart(customerId: number) {
+    await pool.execute(`DELETE FROM cart_item WHERE customerId = ?`, [customerId]);
   }
 }
 

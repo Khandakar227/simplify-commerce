@@ -109,7 +109,59 @@ class Product {
             data: rows as IProduct[],
         };
     }
+
+    
+static async findProducts(data: { keyword: string, category: string, sortby: string, order: string, page: string }) {
+    const { keyword, category, sortby, order, page } = data;
+    const limit = 20;
+    const offset = (parseInt(page) || 1 - 1) * limit;
+    const values: (string | number)[] = [];
+
+    let orderBy = '', matchKeyword = '', categoryFilter = '';
+
+    if (keyword && keyword?.trim()) {
+        matchKeyword = `(name LIKE CONCAT('%', ?, '%') OR category LIKE CONCAT('%', ?, '%'))`;
+        values.push(keyword, keyword);
+    }
+
+    if (category) {
+        categoryFilter = `category = ?`;
+        values.push(category);
+    }
+
+    if (sortby && order) {
+        orderBy = `ORDER BY ${sortby} ${order === 'ASC' ? 'ASC' : 'DESC'}`;
+    }
+
+    const countQuery = `SELECT COUNT(*) as totalCount FROM product
+    ${matchKeyword || categoryFilter ? 'WHERE' : ""} ${matchKeyword} ${matchKeyword && categoryFilter ? 'AND' : ""} ${categoryFilter}`;
+
+    // const dataQuery = `SELECT product.id, name, price, stock, totalSold, MIN(pi.url) as picture FROM product
+    const dataQuery = `SELECT product.id, name, price, stock, MIN(pi.url) as picture FROM product
+        LEFT JOIN product_image pi ON product.id = pi.productId
+        ${matchKeyword || categoryFilter ? 'WHERE' : ""} ${matchKeyword} ${matchKeyword && categoryFilter ? 'AND' : ""} ${categoryFilter}
+        GROUP BY product.id
+        ${orderBy}
+        LIMIT ${limit}
+        OFFSET ${offset}`;
+    
+        console.log(countQuery, '\n', dataQuery, '\n', values);
+
+    const [[{ totalCount }]]: any = await pool.execute(countQuery, values);
+    const [rows] = await pool.execute(dataQuery, values);
+    const totalPages = Math.ceil(totalCount / limit);
+
+    // console.log(rows)
+    return {
+        totalPages,
+        totalCount,
+        currentPage: parseInt(page) || 1,
+        data: rows as IProduct[],
+    };
 }
+}
+
+
 
 export default Product;
 
