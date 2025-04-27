@@ -8,6 +8,8 @@ import { IProduct } from "@/lib/model/Product";
 import { Search } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { UserCircle } from "lucide-react";
 
 export default function Dashboard() {
   const [products, setProducts] = useState([] as IProductCard[]);
@@ -36,11 +38,32 @@ export default function Dashboard() {
     setCurrentPage(0);
   }
   return (
-    <div className="p-4">
-        <div className="flex justify-between items-center gap-4">
-            <h1 className="font-extrabold text-3xl py-4">DASHBOARD</h1>
+    <div className="min-h-screen flex flex-col bg-black text-white">
+      {/* Navbar */}
+      <nav className="w-full bg-gray-900 shadow flex items-center justify-between px-8 py-4">
+        <div className="flex items-center gap-8">
+          <span className="text-2xl font-bold tracking-wide text-green-400">Simply Commerce</span>
+          <Tabs defaultValue="dashboard">
+            <TabsList className="bg-transparent gap-2">
+              <TabsTrigger value="dashboard" className="text-white">Dashboard</TabsTrigger>
+              <TabsTrigger value="orders" className="text-white">Orders</TabsTrigger>
+              <TabsTrigger value="products" className="text-white">Products</TabsTrigger>
+              <TabsTrigger value="settings" className="text-white">Settings</TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
+        <div className="flex items-center gap-4">
+          <button className="rounded-full p-2 hover:bg-gray-800 transition">
+            <UserCircle size={32} />
+          </button>
+        </div>
+      </nav>
 
+      {/* Main Content */}
+      <main className="flex-1 p-4">
+        <div className="flex justify-between items-center gap-4">
+          <h1 className="font-extrabold text-3xl py-4">DASHBOARD</h1>
+        </div>
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Products Inventory</CardTitle>
@@ -79,6 +102,33 @@ export default function Dashboard() {
             }
           </CardFooter>
         </Card>
+      </main>
+
+      {/* Footer */}
+      <footer className="w-full bg-gray-900 text-gray-300 py-8 mt-8 border-t border-gray-800">
+        <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex flex-col items-center md:items-start">
+            <span className="text-xl font-bold text-green-400">Simply Commerce</span>
+            <span className="text-sm mt-1">Your one-stop tech shop for all electronics and robotics needs.</span>
+          </div>
+          <div className="flex gap-8 mt-4 md:mt-0">
+            <div className="flex flex-col gap-1">
+              <span className="font-semibold text-white">Links</span>
+              <Link href="/" className="hover:underline">Home</Link>
+              <Link href="/products" className="hover:underline">Products</Link>
+              <Link href="/about" className="hover:underline">About</Link>
+              <Link href="/contact" className="hover:underline">Contact</Link>
+            </div>
+            <div className="flex flex-col gap-1">
+              <span className="font-semibold text-white">Seller</span>
+              <Link href="/seller/dashboard" className="hover:underline">Dashboard</Link>
+              <Link href="/seller/orders" className="hover:underline">Orders</Link>
+              <Link href="/seller/products" className="hover:underline">My Products</Link>
+            </div>
+          </div>
+        </div>
+        <div className="text-center text-xs text-gray-500 mt-6">&copy; {new Date().getFullYear()} Simply Commerce. All rights reserved.</div>
+      </footer>
     </div>
   )
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { init } from '@/lib/conn';
+import { products } from '@/data/techshopbd';
 
 export const GET = async (request: NextRequest) => {
     try {
