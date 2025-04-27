@@ -77,7 +77,9 @@ CREATE TABLE IF NOT EXISTS customer (
 CREATE TABLE IF NOT EXISTS `order` (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     customerId INT UNSIGNED,
-    sellerId INT UNSIGNED,
+    customerName VARCHAR(255) NOT NULL,
+    customerEmail VARCHAR(255) NOT NULL,
+    customerPhone VARCHAR(255) NOT NULL,
     paymentMethodId INT UNSIGNED,
     status ENUM('Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled') DEFAULT 'Pending',
     totalAmount DECIMAL(10,2) NOT NULL,
