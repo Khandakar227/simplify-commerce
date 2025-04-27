@@ -3,6 +3,10 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import CartDrawer from "@/components/CartDrawer";
+import { ShoppingCart } from "lucide-react";
+import { useToast } from "@/components/ToastContext";
+import { useUser } from "@/lib/global-states/user";
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -11,6 +15,10 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
+  const { showToast } = useToast();
+  const [user] = useUser();
 
   useEffect(() => {
     async function fetchProduct() {
@@ -23,12 +31,39 @@ export default function ProductDetailPage() {
     if (slug) fetchProduct();
   }, [slug]);
 
+  // Cart count sync
+  useEffect(() => {
+    function updateCartCount() {
+      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      setCartCount(cart.reduce((sum, item) => sum + item.quantity, 0));
+    }
+    updateCartCount();
+    window.addEventListener("storage", updateCartCount);
+    return () => window.removeEventListener("storage", updateCartCount);
+  }, []);
+
+  // Listen for cart changes from this tab
+  useEffect(() => {
+    const origSetItem = localStorage.setItem;
+    localStorage.setItem = function (...args) {
+      origSetItem.apply(this, args);
+      if (args[0] === "cart") {
+        const cart = JSON.parse(args[1] || "[]");
+        setCartCount(cart.reduce((sum, item) => sum + item.quantity, 0));
+      }
+    };
+    return () => {
+      localStorage.setItem = origSetItem;
+    };
+  }, []);
+
   const addToCart = () => {
     if (!product) return;
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
     const existing = cart.find((item: any) => item.productId === product.id);
     if (existing) {
       existing.quantity += quantity;
+      showToast();
     } else {
       cart.push({
         productId: product.id,
@@ -38,9 +73,17 @@ export default function ProductDetailPage() {
         stock: product.stock,
         quantity,
       });
+      showToast();
     }
     localStorage.setItem("cart", JSON.stringify(cart));
-    alert("Added to cart!");
+  };
+
+  const handleDashboardClick = () => {
+    if (!user?.name) {
+      router.push("/customer/login");
+    } else {
+      router.push("/customer/dashboard");
+    }
   };
 
   if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
@@ -48,6 +91,7 @@ export default function ProductDetailPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-green-50 to-green-100">
+      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
       <nav className="w-full sticky top-0 z-20 bg-white/80 backdrop-blur border-b border-green-200 shadow-sm flex items-center justify-between px-8 py-3">
         <div className="flex items-center">
           <svg className="w-8 h-8 text-green-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -56,14 +100,25 @@ export default function ProductDetailPage() {
           </svg>
           <span className="text-2xl font-bold tracking-wide text-green-700">Simply Commerce</span>
         </div>
-        <div className="flex-1 flex justify-center">
-          <Button variant="outline" onClick={() => router.push("/")}>Home</Button>
+        <div className="flex-1 flex justify-center gap-4">
+          <Button variant="default" onClick={() => router.push("/")}>Home</Button>
+          <Button variant="default" onClick={handleDashboardClick}>Dashboard</Button>
         </div>
-        <div className="rounded-full p-2 border border-green-200 flex items-center justify-center">
-          <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <circle cx="12" cy="12" r="10" strokeWidth="2" stroke="currentColor" fill="white"/>
-            <path d="M12 14c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4z" strokeWidth="2" stroke="currentColor" fill="none"/>
-          </svg>
+        <div className="flex items-center gap-4">
+          {/* Cart Icon with badge */}
+          <button className="relative rounded-full p-2 border border-green-200 flex items-center justify-center hover:bg-green-100 transition" onClick={() => setCartOpen(true)} aria-label="Cart">
+            <ShoppingCart className="w-7 h-7 text-green-600" />
+            {cartCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-amber-500 text-white text-xs font-bold rounded-full px-1.5 py-0.5 min-w-[20px] text-center">{cartCount}</span>
+            )}
+          </button>
+          {/* Profile Icon */}
+          <div className="rounded-full p-2 border border-green-200 flex items-center justify-center">
+            <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <circle cx="12" cy="12" r="10" strokeWidth="2" stroke="currentColor" fill="white"/>
+              <path d="M12 14c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4z" strokeWidth="2" stroke="currentColor" fill="none"/>
+            </svg>
+          </div>
         </div>
       </nav>
       <main className="flex-1 flex flex-col items-center py-8 px-2">

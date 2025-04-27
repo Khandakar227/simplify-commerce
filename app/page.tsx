@@ -2,10 +2,19 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import CartDrawer from "@/components/CartDrawer";
+import { ShoppingCart } from "lucide-react";
+import { useUser } from "@/lib/global-states/user";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
+  const [user] = useUser();
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchProducts() {
@@ -18,8 +27,43 @@ export default function Home() {
     fetchProducts();
   }, []);
 
+  // Cart count sync
+  useEffect(() => {
+    function updateCartCount() {
+      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      setCartCount(cart.reduce((sum: number, item: any) => sum + item.quantity, 0));
+    }
+    updateCartCount();
+    window.addEventListener("storage", updateCartCount);
+    return () => window.removeEventListener("storage", updateCartCount);
+  }, []);
+
+  // Listen for cart changes from this tab
+  useEffect(() => {
+    const origSetItem = localStorage.setItem;
+    localStorage.setItem = function (...args) {
+      origSetItem.apply(this, args);
+      if (args[0] === "cart") {
+        const cart = JSON.parse(args[1] || "[]");
+        setCartCount(cart.reduce((sum: number, item: any) => sum + item.quantity, 0));
+      }
+    };
+    return () => {
+      localStorage.setItem = origSetItem;
+    };
+  }, []);
+
+  const handleDashboardClick = () => {
+    if (!user?.name) {
+      router.push("/customer/login");
+    } else {
+      router.push("/customer/dashboard");
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-green-50 to-green-100">
+      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
       <nav className="w-full sticky top-0 z-20 bg-white/80 backdrop-blur border-b border-green-200 shadow-sm flex items-center justify-between px-8 py-3">
         <div className="flex items-center">
           <svg className="w-8 h-8 text-green-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -28,14 +72,25 @@ export default function Home() {
           </svg>
           <span className="text-2xl font-bold tracking-wide text-green-700">Simply Commerce</span>
         </div>
-        <div className="flex-1 flex justify-center">
-          <span className="text-green-700 font-semibold px-4 py-2 rounded-lg">Home</span>
+        <div className="flex-1 flex justify-center gap-4">
+          <Button variant="default" onClick={() => router.push("/")}>Home</Button>
+          <Button variant="default" onClick={handleDashboardClick}>Dashboard</Button>
         </div>
-        <div className="rounded-full p-2 border border-green-200 flex items-center justify-center">
-          <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <circle cx="12" cy="12" r="10" strokeWidth="2" stroke="currentColor" fill="white"/>
-            <path d="M12 14c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4z" strokeWidth="2" stroke="currentColor" fill="none"/>
-          </svg>
+        <div className="flex items-center gap-4">
+          {/* Cart Icon with badge */}
+          <button className="relative rounded-full p-2 border border-green-200 flex items-center justify-center hover:bg-green-100 transition" onClick={() => setCartOpen(true)} aria-label="Cart">
+            <ShoppingCart className="w-7 h-7 text-green-600" />
+            {cartCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-amber-500 text-white text-xs font-bold rounded-full px-1.5 py-0.5 min-w-[20px] text-center">{cartCount}</span>
+            )}
+          </button>
+          {/* Profile Icon */}
+          <div className="rounded-full p-2 border border-green-200 flex items-center justify-center">
+            <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <circle cx="12" cy="12" r="10" strokeWidth="2" stroke="currentColor" fill="white"/>
+              <path d="M12 14c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4z" strokeWidth="2" stroke="currentColor" fill="none"/>
+            </svg>
+          </div>
         </div>
       </nav>
       <main className="flex-1 flex flex-col items-center py-8 px-2">
