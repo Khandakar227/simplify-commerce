@@ -16,6 +16,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import Navbar from "@/components/Navbar";
 
 type Product = {
   id: number;
@@ -23,6 +24,7 @@ type Product = {
   price: string;
   stock: number;
   picture: string;
+  slug: string;
 };
 
 type ProductResponse = {
@@ -145,7 +147,8 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 pb-8">
+      <Navbar/>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <h1 className="text-3xl font-bold">Our Products</h1>
         
@@ -250,14 +253,14 @@ export default function ProductsPage() {
                     </CardHeader>
                     <CardContent className="pt-4">
                       <h3 className="font-semibold text-lg line-clamp-1">{product.name}</h3>
-                      <p className="text-primary font-bold mt-2">${product.price}</p>
+                      <p className="text-primary font-bold mt-2">Tk. {product.price}</p>
                       <p className="text-sm text-muted-foreground mt-1">
                         {product.stock > 0 ? "In Stock" : "Out of Stock"}
                       </p>
                     </CardContent>
                     <CardFooter className="flex justify-between">
                       <Button className="bg-green-200" variant="outline" asChild>
-                        <Link href={`/products/${product.id}`}>Details</Link>
+                        <Link href={`/product/${product.slug}`}>Details</Link>
                       </Button>
                       <Button>Add to Cart</Button>
                     </CardFooter>

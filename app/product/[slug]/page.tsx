@@ -7,6 +7,7 @@ import CartDrawer from "@/components/CartDrawer";
 import { ShoppingCart } from "lucide-react";
 import { useToast } from "@/components/ToastContext";
 import { useUser } from "@/lib/global-states/user";
+import Link from "next/link";
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -35,7 +36,7 @@ export default function ProductDetailPage() {
   useEffect(() => {
     function updateCartCount() {
       const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-      setCartCount(cart.reduce((sum, item) => sum + item.quantity, 0));
+      setCartCount(cart.reduce((sum: any, item: { quantity: any; }) => sum + item.quantity, 0));
     }
     updateCartCount();
     window.addEventListener("storage", updateCartCount);
@@ -49,7 +50,7 @@ export default function ProductDetailPage() {
       origSetItem.apply(this, args);
       if (args[0] === "cart") {
         const cart = JSON.parse(args[1] || "[]");
-        setCartCount(cart.reduce((sum, item) => sum + item.quantity, 0));
+        setCartCount(cart.reduce((sum: any, item: { quantity: any; }) => sum + item.quantity, 0));
       }
     };
     return () => {
@@ -70,6 +71,7 @@ export default function ProductDetailPage() {
         name: product.name,
         price: product.price,
         image: product.pictures?.[0] || "",
+        slug: product.slug,
         stock: product.stock,
         quantity,
       });
@@ -93,17 +95,14 @@ export default function ProductDetailPage() {
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-green-50 to-green-100">
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
       <nav className="w-full sticky top-0 z-20 bg-white/80 backdrop-blur border-b border-green-200 shadow-sm flex items-center justify-between px-8 py-3">
-        <div className="flex items-center">
+        <Link href="/" className="flex items-center">
           <svg className="w-8 h-8 text-green-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <rect x="3" y="6" width="18" height="13" rx="2" strokeWidth="2" stroke="currentColor" fill="white"/>
             <path d="M16 10l-4 4-2-2" strokeWidth="2" stroke="currentColor" fill="none"/>
           </svg>
           <span className="text-2xl font-bold tracking-wide text-green-700">Simply Commerce</span>
-        </div>
-        <div className="flex-1 flex justify-center gap-4">
-          <Button variant="default" onClick={() => router.push("/")}>Home</Button>
-          <Button variant="default" onClick={handleDashboardClick}>Dashboard</Button>
-        </div>
+        </Link>
+
         <div className="flex items-center gap-4">
           {/* Cart Icon with badge */}
           <button className="relative rounded-full p-2 border border-green-200 flex items-center justify-center hover:bg-green-100 transition" onClick={() => setCartOpen(true)} aria-label="Cart">
@@ -121,6 +120,7 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </nav>
+      
       <main className="flex-1 flex flex-col items-center py-8 px-2">
         <div className="w-full max-w-2xl mx-auto">
           <Card className="bg-amber-50 shadow-xl rounded-xl border border-amber-200 p-6">
@@ -139,7 +139,7 @@ export default function ProductDetailPage() {
                 </div>
                 <div className="w-full mt-4">
                   <h2 className="text-xl font-bold text-green-700 mb-2">Description</h2>
-                  <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: product.description }} />
+                  <div className="prose max-w-none whitespace-break-spaces" dangerouslySetInnerHTML={{ __html: product.description }} />
                 </div>
                 <div className="flex items-center gap-4 mt-6">
                   <input

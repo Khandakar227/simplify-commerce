@@ -8,9 +8,10 @@ import { useState, useEffect, FormEvent } from "react";
 import { Loader2 } from "lucide-react";
 import { useUser } from "@/lib/global-states/user";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function CustomerLogin() {
-  const [user, _] = useUser();
+  const [user, setUser] = useUser();
   const router = useRouter();
 
   useEffect(() => {
@@ -19,13 +20,13 @@ export default function CustomerLogin() {
 
   return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-green-50 to-green-100">
-      <div className="flex items-center mb-8 mt-4">
+      <Link href="/" className="flex items-center mb-8 mt-4">
         <svg className="w-10 h-10 text-green-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <rect x="3" y="6" width="18" height="13" rx="2" strokeWidth="2" stroke="currentColor" fill="white" />
           <path d="M16 10l-4 4-2-2" strokeWidth="2" stroke="currentColor" fill="none" />
         </svg>
         <span className="text-3xl font-bold text-green-700 tracking-tight">Simplify Commerce</span>
-      </div>
+      </Link>
       <Tabs defaultValue="Login" className="w-full max-w-md">
         <TabsList className="w-full bg-transparent rounded-xl mb-2 border border-amber-200">
           <TabsTrigger className="w-full bg-green-50 data-[state=active]:bg-amber-50 data-[state=active]:font-bold data-[state=active]:text-green-700 text-green-700 font-semibold rounded-xl transition" value="Login">

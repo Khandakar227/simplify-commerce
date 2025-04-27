@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function CartDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [cart, setCart] = useState<any[]>([]);
@@ -89,7 +90,9 @@ export default function CartDrawer({ open, onClose }: { open: boolean; onClose: 
             <span className="font-semibold text-green-700">Subtotal</span>
             <span className="text-xl font-bold text-green-700">৳{subtotal}</span>
           </div>
-          <Button className="w-full bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow mb-2" disabled={cart.length === 0}>Checkout</Button>
+          <Link href="/checkout" className="w-full">
+            <Button className="w-full bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow mb-2" disabled={cart.length === 0}>Checkout</Button>
+          </Link>
           <Button variant="outline" className="w-full" onClick={clearCart} disabled={cart.length === 0}>Clear Cart</Button>
         </div>
       </aside>

@@ -20,20 +20,9 @@ export default function CustomerDashboard() {
       <Navbar/>
       <main className="flex-1 flex flex-col items-center py-8 px-2">
         <div className="w-full max-w-2xl mx-auto">
-          <Card className="bg-amber-50 shadow-xl rounded-xl border border-amber-200 p-6">
-            <CardHeader>
-              <h1 className="font-extrabold text-3xl text-green-700 py-2 text-center">Welcome, {user?.name || "Customer"}!</h1>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col items-center gap-4">
-                <p className="text-green-700 text-lg text-center">This is your customer dashboard. Here you can view your orders, manage your profile, and explore products.</p>
-              </div>
-
-              <div className="py-4">
-                <Orders/>
-              </div>
-            </CardContent>
-          </Card>
+            <div className="py-4">
+            <Orders/>
+            </div>
         </div>
       </main>
       <footer className="w-full bg-green-600 text-white py-6 mt-8 shadow-inner">

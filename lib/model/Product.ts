@@ -89,7 +89,7 @@ class Product {
         WHERE ${matchKeyword} ${categoryFilter} sellerId = ?`;
 
         // const dataQuery = `SELECT product.id, name, price, stock, totalSold, MIN(pi.url) as picture FROM product
-        const dataQuery = `SELECT product.id, name, price, stock, MIN(pi.url) as picture FROM product
+        const dataQuery = `SELECT product.id, name, price, stock, slug, MIN(pi.url) as picture FROM product
             LEFT JOIN product_image pi ON product.id = pi.productId
             WHERE ${matchKeyword} ${categoryFilter} sellerId = ?
             GROUP BY product.id
@@ -137,7 +137,7 @@ static async findProducts(data: { keyword: string, category: string, sortby: str
     ${matchKeyword || categoryFilter ? 'WHERE' : ""} ${matchKeyword} ${matchKeyword && categoryFilter ? 'AND' : ""} ${categoryFilter}`;
 
     // const dataQuery = `SELECT product.id, name, price, stock, totalSold, MIN(pi.url) as picture FROM product
-    const dataQuery = `SELECT product.id, name, price, stock, MIN(pi.url) as picture FROM product
+    const dataQuery = `SELECT product.id, name, price, stock, slug, MIN(pi.url) as picture FROM product
         LEFT JOIN product_image pi ON product.id = pi.productId
         ${matchKeyword || categoryFilter ? 'WHERE' : ""} ${matchKeyword} ${matchKeyword && categoryFilter ? 'AND' : ""} ${categoryFilter}
         GROUP BY product.id
