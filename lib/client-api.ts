@@ -66,3 +66,16 @@ export const getProducts = async (params: { keyword?: string, category?: string,
     const result = await res.json();
     return result;
 }
+
+export const getCustomerFromToken = async (accessToken: string) => {
+    const options = {
+        method: 'GET',
+        headers: {
+            Authorization: `Bearer ${accessToken}`
+        }
+    };
+
+    const res = await fetch("/api/customer", options);
+    const result = await res.json();
+    return result;
+}

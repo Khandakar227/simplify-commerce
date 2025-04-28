@@ -45,7 +45,7 @@ export default function Dashboard() {
             <rect x="3" y="6" width="18" height="13" rx="2" strokeWidth="2" stroke="currentColor" fill="white"/>
             <path d="M16 10l-4 4-2-2" strokeWidth="2" stroke="currentColor" fill="none"/>
           </svg>
-          <span className="text-2xl font-bold tracking-wide text-green-700">Simply Commerce</span>
+          <Link href={"/seller/dashboard"} className="text-2xl font-bold tracking-wide text-green-700">Simply Commerce</Link>
         </div>
         <div className="flex-1 flex justify-center">
           <Tabs defaultValue="dashboard">

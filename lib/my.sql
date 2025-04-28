@@ -77,7 +77,9 @@ CREATE TABLE IF NOT EXISTS customer (
 CREATE TABLE IF NOT EXISTS `order` (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     customerId INT UNSIGNED,
-    sellerId INT UNSIGNED,
+    customerName VARCHAR(255) NOT NULL,
+    customerEmail VARCHAR(255) NOT NULL,
+    customerPhone VARCHAR(255) NOT NULL,
     paymentMethodId INT UNSIGNED,
     status ENUM('Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled') DEFAULT 'Pending',
     totalAmount DECIMAL(10,2) NOT NULL,
@@ -99,21 +101,13 @@ CREATE TABLE IF NOT EXISTS order_item (
     FOREIGN KEY (productId) REFERENCES product(id) ON DELETE CASCADE
 );
 
--- Cart table
-CREATE TABLE IF NOT EXISTS cart (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    customerId INT UNSIGNED,
-    createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (customerId) REFERENCES customer(id) ON DELETE CASCADE
-);
-
 -- Cart items
 CREATE TABLE IF NOT EXISTS cart_item (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    cartId INT UNSIGNED NOT NULL,
+    customerId INT UNSIGNED NOT NULL,
     productId INT UNSIGNED NOT NULL,
     quantity INT UNSIGNED NOT NULL,
-    FOREIGN KEY (cartId) REFERENCES cart(id) ON DELETE CASCADE,
+    FOREIGN KEY (customerId) REFERENCES customer(id) ON DELETE CASCADE,
     FOREIGN KEY (productId) REFERENCES product(id) ON DELETE CASCADE
 );
 

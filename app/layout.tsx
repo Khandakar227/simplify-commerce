@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { ToastProvider } from "@/components/ToastContext";
+import LoadUser from "@/components/LoadCustomer";
 
 
 export const metadata: Metadata = {
@@ -18,9 +20,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning >
       <body
-        className="antialiased dark"
+        className="antialiased"
       >
-        {children}
+        <LoadUser />
+        <ToastProvider>
+          {children}
+        </ToastProvider>
       </body>
     </html>
   );
